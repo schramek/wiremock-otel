@@ -27,6 +27,7 @@ ENV OTEL_SERVICE_NAME="wiremock"
 ENV OTEL_TRACES_EXPORTER="otlp"
 ENV OTEL_METRICS_EXPORTER="none"
 ENV OTEL_LOGS_EXPORTER="none"
+ENV OTEL_PROPAGATORS="tracecontext,baggage,b3multi"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT="http://otel-collector:4317"
 
 USER wiremock

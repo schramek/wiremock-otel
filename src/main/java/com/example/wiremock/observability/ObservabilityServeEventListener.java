@@ -25,7 +25,11 @@ public class ObservabilityServeEventListener implements ServeEventListener {
       "wiremock.stub_id",
       "traceparent",
       "trace_id",
-      "span_id"
+      "span_id",
+      "b3.trace_id",
+      "b3.span_id",
+      "b3.sampled",
+      "b3.flags"
   };
 
   @Override
@@ -33,6 +37,8 @@ public class ObservabilityServeEventListener implements ServeEventListener {
     Request request = serveEvent.getRequest();
     LoggedResponse response = serveEvent.getResponse();
     String traceparent = firstHeader(request, "traceparent").orElse(null);
+    String b3TraceId = firstHeader(request, "X-B3-TraceId").orElse(null);
+    String b3SpanId = firstHeader(request, "X-B3-SpanId").orElse(null);
 
     try {
       put("wiremock.request_id", stringValue(serveEvent.getId()));
@@ -43,8 +49,12 @@ public class ObservabilityServeEventListener implements ServeEventListener {
       put("wiremock.was_matched", String.valueOf(serveEvent.getWasMatched()));
       put("wiremock.stub_id", stubId(serveEvent).orElse(null));
       put("traceparent", traceparent);
-      put("trace_id", TraceContext.traceIdFromTraceparent(traceparent).orElse(null));
-      put("span_id", TraceContext.spanIdFromTraceparent(traceparent).orElse(null));
+      put("trace_id", traceId(traceparent, b3TraceId).orElse(null));
+      put("span_id", spanId(traceparent, b3SpanId).orElse(null));
+      put("b3.trace_id", TraceContext.normalizeB3TraceId(b3TraceId).orElse(null));
+      put("b3.span_id", TraceContext.normalizeB3SpanId(b3SpanId).orElse(null));
+      put("b3.sampled", firstHeader(request, "X-B3-Sampled").orElse(null));
+      put("b3.flags", firstHeader(request, "X-B3-Flags").orElse(null));
 
       LOGGER.info("wiremock_request_completed");
     } finally {
@@ -71,6 +81,16 @@ public class ObservabilityServeEventListener implements ServeEventListener {
     }
 
     return Optional.of(url.substring(queryStart + 1));
+  }
+
+  private static Optional<String> traceId(String traceparent, String b3TraceId) {
+    return TraceContext.traceIdFromTraceparent(traceparent)
+        .or(() -> TraceContext.normalizeB3TraceId(b3TraceId));
+  }
+
+  private static Optional<String> spanId(String traceparent, String b3SpanId) {
+    return TraceContext.spanIdFromTraceparent(traceparent)
+        .or(() -> TraceContext.normalizeB3SpanId(b3SpanId));
   }
 
   private static Optional<String> stubId(ServeEvent serveEvent) {

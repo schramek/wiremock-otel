@@ -35,6 +35,8 @@ spec:
               value: none
             - name: OTEL_LOGS_EXPORTER
               value: none
+            - name: OTEL_PROPAGATORS
+              value: tracecontext,baggage,b3multi
             - name: WIREMOCK_LOG_LEVEL
               value: INFO
             - name: WIREMOCK_OBSERVABILITY_LOG_LEVEL

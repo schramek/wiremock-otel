@@ -13,6 +13,7 @@ services:
       OTEL_TRACES_EXPORTER: otlp
       OTEL_METRICS_EXPORTER: none
       OTEL_LOGS_EXPORTER: none
+      OTEL_PROPAGATORS: tracecontext,baggage,b3multi
       WIREMOCK_LOG_LEVEL: INFO
       WIREMOCK_OBSERVABILITY_LOG_LEVEL: INFO
     volumes:
