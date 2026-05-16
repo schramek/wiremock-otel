@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - wiremock-deployment.yaml
+  - wiremock-service.yaml
+  - otel-collector-deployment.yaml
+  - otel-collector-service.yaml
+
+configMapGenerator:
+  - name: otel-collector-config
+    files:
+      - config.yml=../../src/main/resources/otel-collector.yml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+images:
+  - name: wiremock-observability
+    newName: wiremock-observability
+    newTag: latest

@@ -1,0 +1,15 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/hello"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "message": "hello from wiremock"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

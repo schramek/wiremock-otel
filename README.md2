@@ -1,0 +1,86 @@
+# WireMock Observability Docker Image
+
+Dieses Projekt baut ein eigenes WireMock-Community-Image mit:
+
+- JSON-Logging über Logback und `logstash-logback-encoder`
+- OpenTelemetry Java Agent mit OTLP-Export
+- WireMock-Extension für strukturierte Request-Logs
+- Trace-Header-Ergänzung für Stub-/Proxy-Requests, ohne Admin-API-Requests zu verändern
+
+Die WireMock Admin-REST-APIs bleiben unverändert verfügbar, z. B.:
+
+- `GET /__admin/mappings`
+- `GET /__admin/requests`
+- `POST /__admin/mappings`
+
+## Build und Start
+
+```bash
+docker compose up --build
+```
+
+WireMock läuft anschließend auf `http://localhost:8080`.
+
+Die Beispiel-Mappings und `__files` liegen unter `src/main/resources/wiremock`. Das Docker-Image kopiert sie nach `/home/wiremock`; `docker-compose.yml` mountet denselben Ordner für lokale Entwicklung.
+
+## Wichtige Konfiguration
+
+Das Image setzt sinnvolle Defaults, die pro Umgebung überschrieben werden können:
+
+```bash
+OTEL_SERVICE_NAME=wiremock
+OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+OTEL_TRACES_EXPORTER=otlp
+OTEL_METRICS_EXPORTER=none
+OTEL_LOGS_EXPORTER=none
+WIREMOCK_LOG_LEVEL=INFO
+WIREMOCK_OBSERVABILITY_LOG_LEVEL=INFO
+```
+
+Die JVM wird über `JAVA_TOOL_OPTIONS` mit dem OTel Agent gestartet. Die Logback-Konfiguration liegt als `logback.xml` im Extension-JAR und wird automatisch vom Classpath geladen:
+
+```bash
+-javaagent:/otel/opentelemetry-javaagent.jar
+```
+
+## Validierung
+
+Automatisch:
+
+```bash
+./scripts/validate.sh
+```
+
+Admin-APIs prüfen:
+
+```bash
+curl -s http://localhost:8080/__admin/mappings
+curl -s http://localhost:8080/__admin/requests
+```
+
+Stub mit Trace-Header aufrufen:
+
+```bash
+curl -i \
+  -H 'traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01' \
+  http://localhost:8080/hello
+```
+
+In den Container-Logs sollte ein JSON-Log mit `wiremock_request_completed`, `trace_id`, `span_id`, HTTP-Methode, Pfad und Status erscheinen.
+
+## Proxy-Mappings
+
+Bestehende Proxy-Mappings funktionieren weiter. Die Extension ergänzt nur dann `traceparent`, wenn der eingehende Stub-/Proxy-Request keinen Header enthält. Vorhandene `traceparent`, `tracestate` und `baggage` Header werden nicht überschrieben und bleiben für Proxy-Ziele erhalten.
+
+Ein Beispiel für ein Proxy-Mapping liegt in `src/main/resources/wiremock/mappings/proxy-with-trace-headers.json`.
+
+## Kubernetes
+
+Kustomize-Manifeste liegen unter `deployment`:
+
+```bash
+kubectl apply -k deployment/base
+kubectl apply -k deployment/overlays/other-namespace
+```
+
+Das Base-Deployment verwendet das Image `wiremock-observability:latest`. Passe es per Kustomize `images`-Patch oder in `deployment/base/kustomization.yaml` auf deine Registry an.

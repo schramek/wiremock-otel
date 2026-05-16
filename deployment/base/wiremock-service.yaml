@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wiremock
+  labels:
+    app.kubernetes.io/name: wiremock
+    app.kubernetes.io/component: mock-server
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: wiremock
+    app.kubernetes.io/component: mock-server
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

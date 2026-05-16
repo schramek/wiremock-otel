@@ -1,0 +1,28 @@
+services:
+  wiremock:
+    build:
+      context: .
+      args:
+        WIREMOCK_DOCKER_TAG: 3.13.2-3
+        OTEL_JAVA_AGENT_VERSION: 2.27.0
+    ports:
+      - "8080:8080"
+    environment:
+      OTEL_SERVICE_NAME: wiremock
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      WIREMOCK_LOG_LEVEL: INFO
+      WIREMOCK_OBSERVABILITY_LOG_LEVEL: INFO
+    volumes:
+      - ./src/main/resources/wiremock:/home/wiremock:ro
+
+  otel-collector:
+    image: otel/opentelemetry-collector:0.152.0
+    command: ["--config=/etc/otelcol/config.yml"]
+    volumes:
+      - ./src/main/resources/otel-collector.yml:/etc/otelcol/config.yml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"

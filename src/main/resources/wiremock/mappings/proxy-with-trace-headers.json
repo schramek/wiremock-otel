@@ -1,0 +1,12 @@
+{
+  "request": {
+    "method": "ANY",
+    "urlPathPattern": "/proxy/.*"
+  },
+  "response": {
+    "proxyBaseUrl": "https://httpbin.org/anything",
+    "additionalProxyRequestHeaders": {
+      "x-wiremock-proxy": "true"
+    }
+  }
+}
