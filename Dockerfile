@@ -13,9 +13,7 @@ FROM wiremock/wiremock:${WIREMOCK_DOCKER_TAG}
 
 USER root
 
-ARG OTEL_JAVA_AGENT_VERSION=2.27.0
-ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_JAVA_AGENT_VERSION}/opentelemetry-javaagent.jar /otel/opentelemetry-javaagent.jar
-
+COPY --from=extension-build /workspace/target/otel/opentelemetry-javaagent.jar /otel/opentelemetry-javaagent.jar
 COPY --from=extension-build /workspace/target/wiremock-observability-extension.jar /var/wiremock/extensions/wiremock-observability-extension.jar
 COPY --from=extension-build /workspace/target/classes/wiremock /home/wiremock
 

@@ -33,3 +33,4 @@ build/
 ### VS Code ###
 .vscode/
 repository/
+llm-context.md

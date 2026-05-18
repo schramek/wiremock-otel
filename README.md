@@ -10,6 +10,8 @@ The OpenTelemetry Java agent is configured with:
 OTEL_PROPAGATORS=tracecontext,baggage,b3multi
 ```
 
+The agent JAR is managed by Maven via `opentelemetry.javaagent.version` in `pom.xml` and copied into the Docker image from `target/otel/opentelemetry-javaagent.jar`.
+
 The WireMock extension preserves incoming propagation headers and adds the missing counterpart:
 
 - Incoming `traceparent` is preserved and `X-B3-TraceId`, `X-B3-SpanId`, and `X-B3-Sampled` are added when absent.
