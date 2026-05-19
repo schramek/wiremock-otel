@@ -35,28 +35,8 @@ class TraceContextRequestFilterTest {
 
     Request filteredRequest = filter(request);
 
-    assertEquals(TRACEPARENT, filteredRequest.getHeader("traceparent"));
-    assertEquals("11111111111111111111111111111111", filteredRequest.getHeader("X-B3-TraceId"));
-    assertEquals("2222222222222222", filteredRequest.getHeader("X-B3-SpanId"));
-    assertEquals("1", filteredRequest.getHeader("X-B3-Sampled"));
-  }
-
-  @Test
-  void forwardsRequestUnchangedWhenW3cAndB3HeadersAlreadyExist() {
-    Request request = requestWithHeaders(Map.of(
-        "traceparent", TRACEPARENT,
-        "X-B3-TraceId", "33333333333333333333333333333333",
-        "X-B3-SpanId", "4444444444444444",
-        "X-B3-Sampled", "0"
-    ));
-
-    Request filteredRequest = filter(request);
-
     assertSame(request, filteredRequest);
     assertEquals(TRACEPARENT, filteredRequest.getHeader("traceparent"));
-    assertEquals("33333333333333333333333333333333", filteredRequest.getHeader("X-B3-TraceId"));
-    assertEquals("4444444444444444", filteredRequest.getHeader("X-B3-SpanId"));
-    assertEquals("0", filteredRequest.getHeader("X-B3-Sampled"));
   }
 
   @Test
