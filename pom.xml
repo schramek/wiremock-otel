@@ -17,6 +17,7 @@
     <opentelemetry.javaagent.version>2.27.0</opentelemetry.javaagent.version>
     <logback.version>1.5.32</logback.version>
     <logstash.logback.encoder.version>8.1</logstash.logback.encoder.version>
+    <junit.jupiter.version>5.13.1</junit.jupiter.version>
     <slf4j.version>2.0.17</slf4j.version>
     <maven.compiler.release>${java.version}</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -48,6 +49,12 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
